@@ -4,8 +4,7 @@ name: Scheduled fetch (PoC)
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "35 11 * * *"
-    - cron: "*/5 * * * *"
+    - cron: "0 * * * *"
 
 permissions:
   contents: read
