@@ -1,0 +1,37 @@
+# .github/workflows/scheduled-fetch.yml
+name: Scheduled fetch (PoC)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # IMPORTANT: GitHub cron is UTC.
+    # Example below runs daily at 07:15 UTC.
+    - cron: "25 11 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fetch script
+        env:
+          # You can replace this later with the real site/API endpoint you want to monitor.
+          FETCH_URL: "https://httpbin.org/json"
+          FETCH_TIMEOUT_SECONDS: "20"
+        run: |
+          python src/fetch.py
