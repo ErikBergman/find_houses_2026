@@ -6,7 +6,7 @@ on:
   schedule:
     # IMPORTANT: GitHub cron is UTC.
     # Example below runs daily at 07:15 UTC.
-    - cron: "25 11 * * *"
+    - cron: "35 11 * * *"
 
 permissions:
   contents: read
