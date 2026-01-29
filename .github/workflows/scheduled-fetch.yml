@@ -4,8 +4,6 @@ name: Scheduled fetch (PoC)
 on:
   workflow_dispatch: {}
   schedule:
-    # IMPORTANT: GitHub cron is UTC.
-    # Example below runs daily at 07:15 UTC.
     - cron: "35 11 * * *"
     - cron: "*/5 * * * *"
 
