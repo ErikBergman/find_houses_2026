@@ -35,4 +35,6 @@ jobs:
           FETCH_URL: "https://httpbin.org/json"
           FETCH_TIMEOUT_SECONDS: "20"
         run: |
-          python src/fetch.py
+          python request_poc.py
+        
+      
