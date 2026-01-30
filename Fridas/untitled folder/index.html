@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Houses</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
+      h1 { margin: 0 0 8px; }
+      .hint { color: #555; margin: 0 0 16px; }
+      .section { margin: 20px 0 28px; }
+
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+      th { background: #f6f6f6; text-align: left; user-select: none; }
+      a { word-break: break-word; }
+      .empty { color: #777; }
+
+      .sortable th.sortable-col { cursor: pointer; }
+      .sort-indicator { margin-left: 6px; font-size: 0.9em; }
+      .sort-indicator.inactive { opacity: 0.35; }
+    </style>
+  <script type="text/javascript" nonce="b45e2ad3ba71455fbf6b5a204fd" src="//local.adguard.org?ts=1769750997505&amp;type=content-script&amp;dmn=mail-attachment.googleusercontent.com&amp;url=https%3A%2F%2Fmail-attachment.googleusercontent.com%2Fattachment%2Fu%2F1%2F%3Fui%3D2%26ik%3D1c427bc2ee%26attid%3D0.2%26permmsgid%3Dmsg-f%3A1855677419811449510%26th%3D19c0b0c811932aa6%26view%3Datt%26disp%3Dsafe%26realattid%3Df_mkzsqy7t3%26zw%26saddbat%3DANGjdJ-780z5g_dRfJVsRW6J_qLhJji2LQdM0qm9vLh4UAv_UChHN0p6zKooInxq_v0BbPq6GD7l6PWHKDbgYMHhEQTX3DKzg8JCvrt_NeE1-3d8sKldUv-40tJWjQL5eaXpk38RPOCQ0rNC9iaP-xrV1ezc7IygpN2OQ9ZgrhvH_dRlViE5vHyo6KUmwufuCvbzoiRUJVZujP7fTeRnrY7WhtXtOVbDOeRbh97loHnKsadcjZ1vFsVZBygjQSji3TAKBxpsmlXM2TmACTk50FSyrtd5pWL8KPMCgdhgpAYyQVc8lPPNKdar7xctWnacbjF-8lfHDalidCMsU9QmJl5tY5qq4w-Xcev3k7s3LRXNTTUl_J3JKslsNWA0Kjf5HZ4SEWXZyLLDMveT4c68BJb6krxani6lbCXdSa1GI0GQ3tf-HShQrZ_u5zvaZaZAjPjaLhF6_GvO28AN4J-6Ta1hNicPsbcXuh9kS46NUTIsRsCzyc_ArVVAjjBZ05M19n3LJwBhIEX31ZgzzQtnI1txASw_XVI6cIL3Ss3yAJWc6vWJK3MlvGNJTh0EimyvhzAVA0rYyo13IGwIuZZ6E4S0MI6E165rDMxmQrzq-lkDars4yPTU2Sm3uGei67jKbiEDyhmtWl6dLBOSiyhvD9XNHiNUQfDJ-0ohzg6FdyAqOxiBcuy7Bk5ItedqNc_OCybRS0nStUwLzR6S93HsvB1_UiCtd1HaWv-HK0jgO0kDKwTF4Dt1JdHsxp51I-GoBSJSqsreEMgmACLA3uwGAh98ecZZLg9ERAaSHujSXa40KppJbOsSQllHLcA_iG865SqoCdW1Qu3IW-z5zKV0M1J_E5wAk1AuE_NHyJ9OwIyjzp_a-QS9A6Uc3KjrZCGGVdGrazBUbdyvDkkXcEum-_50daNBBpCSrhD1QrOA2PKhHHTCJQMA8zUml4fwM7N5lm_PlvoRCooJJ-qaqMdGo4c9yuv0iGJlps-7hbm6-04rh29hIoq3auJOJa1ncW87Qbe2ybS61kF83FYjQuucCyj_Y2xHEbQlkiukIUdEb7j7LvLg4zlX5OQ3i_rdv5L4uV4ifuih1wLGW_TK9nTxOGmXu-9wfzCJYMvj09UDSg&amp;app=org.mozilla.firefox&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="b45e2ad3ba71455fbf6b5a204fd" src="//local.adguard.org?ts=1769750997505&amp;name=AdGuard%20Extra&amp;type=user-script"></script></head>
+
+  <body>
+    <h1>Listings</h1>
+    <p class="hint">Reading: {{ houses_file }}</p>
+
+    {% if not sections %}
+      <p class="empty">No listings found. Check that houses.txt exists and has content.</p>
+    {% endif %}
+
+    {% for sec in sections %}
+      <div class="section">
+        <div>
+          <strong>Source:</strong>
+          {% if sec.source_url.startswith("http") %}
+            <a href="{{ sec.source_url }}" target="_blank" rel="noreferrer">{{ sec.source_url }}</a>
+          {% else %}
+            {{ sec.source_url }}
+          {% endif %}
+        </div>
+
+        {% if sec.listings %}
+          <table class="sortable">
+            <thead>
+              <tr>
+                <th class="sortable-col" data-sort="area">
+                  Area
+                  <span class="sort-indicator inactive" data-indicator="area">▲</span>
+                </th>
+                <th class="sortable-col" data-sort="price">
+                  Price
+                  <span class="sort-indicator inactive" data-indicator="price">▲</span>
+                </th>
+                <th>Description</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for it in sec.listings %}
+                <tr>
+                  <td data-area="{{ it.area }}">{{ it.area }}</td>
+                  <td data-price="{{ it.price }}">{{ it.price }}</td>
+                  <td>{{ it.description }}</td>
+                  <td><a href="{{ it.url }}" target="_blank" rel="noreferrer">Open</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty">No listings under this source.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <script>
+      function parseAreaToNumber(areaText) {
+        // examples: "160 m²", "160m2", "160,5 m²"
+        const m = String(areaText).match(/(\d+(?:[.,]\d+)?)/);
+        if (!m) return Number.NaN;
+        return Number(m[1].replace(",", "."));
+      }
+
+      function parsePriceToNumber(priceText) {
+        // examples: "2895000", "2 895 000", "2 895 000 kr", "2,895,000"
+        const cleaned = String(priceText).replace(/[^\d]/g, "");
+        if (!cleaned) return Number.NaN;
+        return Number(cleaned);
+      }
+
+      function sortTable(table, key, ascending) {
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+
+        const getValue = (row) => {
+          const areaCell = row.querySelector("td[data-area]");
+          const priceCell = row.querySelector("td[data-price]");
+
+          if (key === "area") return parseAreaToNumber(areaCell?.dataset.area ?? areaCell?.textContent ?? "");
+          if (key === "price") return parsePriceToNumber(priceCell?.dataset.price ?? priceCell?.textContent ?? "");
+          return Number.NaN;
+        };
+
+        rows.sort((a, b) => {
+          const va = getValue(a);
+          const vb = getValue(b);
+
+          const aBad = Number.isNaN(va);
+          const bBad = Number.isNaN(vb);
+
+          if (aBad && bBad) return 0;
+          if (aBad) return 1;
+          if (bBad) return -1;
+
+          return ascending ? (va - vb) : (vb - va);
+        });
+
+        for (const r of rows) tbody.appendChild(r);
+      }
+
+      function updateIndicators(table, activeKey, ascending) {
+        table.querySelectorAll(".sort-indicator").forEach((el) => {
+          const key = el.dataset.indicator;
+          if (key === activeKey) {
+            el.classList.remove("inactive");
+            el.textContent = ascending ? "▲" : "▼";
+          } else {
+            el.classList.add("inactive");
+            el.textContent = "▲";
+          }
+        });
+      }
+
+      document.querySelectorAll("table.sortable").forEach((table) => {
+        let lastKey = null;
+        let ascending = true;
+
+        table.querySelectorAll("th[data-sort]").forEach((th) => {
+          th.addEventListener("click", () => {
+            const key = th.dataset.sort;
+
+            if (lastKey === key) {
+              ascending = !ascending;
+            } else {
+              lastKey = key;
+              ascending = true;
+            }
+
+            sortTable(table, key, ascending);
+            updateIndicators(table, key, ascending);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

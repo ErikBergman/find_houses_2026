@@ -16,6 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore seen ads cache
+        uses: actions/cache@v4
+        with:
+          path: Fridas/state
+          key: seen-ads-${{ github.run_id }}
+          restore-keys: |
+            seen-ads-
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -26,25 +34,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run fetch script
-        env:
-          # You can replace this later with the real site/API endpoint you want to monitor.
-          FETCH_URL: "https://httpbin.org/json"
-          FETCH_TIMEOUT_SECONDS: "20"
+      - name: Run house scraper
         run: |
-          python request_poc.py
-      - name: Notify Telegram (always)
-        if: always()
+          python Fridas/find_houses.py
+
+      - name: Check for new ads
+        id: check
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python Fridas/check_new_ads.py
+
+      - name: Notify Telegram (new ads only)
+        if: steps.check.outputs.new_ads_count != '0'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          STATUS="${{ job.status }}"
-          TEXT="🏠 Scheduled fetch finished: ${STATUS}%0ARepo: ${{ github.repository }}%0ARun: ${RUN_URL}"
+          TEXT="${{ steps.check.outputs.message }}"
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${TELEGRAM_CHAT_ID}" \
-            -d "text=${TEXT}" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TEXT}" \
             -d "disable_web_page_preview=true"
         
         
