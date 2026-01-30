@@ -1,0 +1,58 @@
+{
+  "sources": [
+    {
+      "id": "svenskfast",
+      "match_hosts": ["svenskfast.se"],
+      "fetch": "requests",
+      "strategy": "jsonld",
+      "listing_url_field": "url",
+      "title_fields": {
+        "name": "name",
+        "address": {
+          "street": "streetAddress",
+          "locality": "addressLocality"
+        }
+      },
+      "price_fields": ["price"],
+      "area_fields": ["floorSize.value"]
+    },
+    {
+      "id": "lansfast",
+      "match_hosts": ["lansfast.se"],
+      "fetch": "playwright",
+      "strategy": "link_text",
+      "href_includes": ["/villa/", "/bostadsratt/"],
+      "text_container_max_depth": 12,
+      "require_area_or_price": true
+    },
+    {
+      "id": "fastighetsbyran",
+      "match_hosts": ["fastighetsbyran.com"],
+      "fetch": "requests",
+      "strategy": "link_text",
+      "href_includes": ["/objekt/", "objektID"],
+      "text_container_max_depth": 0,
+      "require_area_or_price": false
+    },
+    {
+      "id": "erikolsson",
+      "match_hosts": ["erikolsson.se"],
+      "fetch": "playwright",
+      "strategy": "next_data",
+      "next_data": {
+        "url_fields": ["url", "path", "href"],
+        "url_includes": ["/homes"],
+        "url_prefix": "https://www.erikolsson.se",
+        "title_fields": ["address", "street", "title", "headline", "name"],
+        "area_fields": ["livingArea", "area", "boarea"],
+        "price_fields": ["price", "askingPrice"]
+      },
+      "fallback": {
+        "strategy": "link_text",
+        "href_includes": ["/homes/"],
+        "text_container_max_depth": 10,
+        "require_area_or_price": true
+      }
+    }
+  ]
+}

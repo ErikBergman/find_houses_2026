@@ -4,19 +4,11 @@ from __future__ import annotations
 import time
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import urlparse
-
-from parsers.common import (
-    Listing,
-    fetch_html_playwright,
-    fetch_html_requests,
-)
-from parsers.erikolsson import parse_erikolsson
-from parsers.fastighetsbyran import parse_fastighetsbyran
-from parsers.lansfast import parse_lansfast
-from parsers.svenskfast import parse_svenskfast
+from parsers.common import Listing
+from parsers.engine import fetch_html, load_sources, parse_listings, select_source
 
 APP_DIR = Path(__file__).resolve().parent
+SOURCES_PATH = APP_DIR / "parsers" / "sources.json"
 SLEEP_BETWEEN_REQUESTS_S = 1.0
 
 
@@ -32,36 +24,23 @@ def filter_listings(listings: Iterable[Listing], keyword: str, min_area_m2: floa
     return out
 
 
-def scrape_one(url: str):
+def scrape_one(url: str, sources: list[dict]):
     """
     Returns (listings, warning_message)
     """
-    host = urlparse(url).netloc.lower()
+    source = select_source(sources, url)
+    if source is None:
+        return [], f"Skipping unknown domain: {url}"
 
-    if "fastighetsbyran.com" in host:
-        html = fetch_html_requests(url)
-        return parse_fastighetsbyran(url, html), None
+    html = fetch_html(url, source)
+    if html is None:
+        return [], (
+            f"Skipping {source.get('id')} because Playwright is not installed. "
+            "Install with: pip install playwright && playwright install chromium"
+        )
 
-    if "svenskfast.se" in host:
-        html = fetch_html_requests(url)
-        return parse_svenskfast(url, html), None
-
-    if "erikolsson.se" in host:
-        html = fetch_html_playwright(url)
-        if html is None:
-            return [], (
-                "Skipping erikolsson.se because Playwright is not installed. "
-                "Install with: pip install playwright && playwright install chromium"
-            )
-        return parse_erikolsson(url, html), None
-
-    if "lansfast.se" in host:
-        html = fetch_html_playwright(url)
-        if html is None:
-            return [], "Skipping lansfast.se because Playwright is not installed."
-        return parse_lansfast(url, html), None
-
-    return [], f"Skipping unknown domain: {host}"
+    listings = parse_listings(url, html, source)
+    return listings, None
 
 
 def read_urls(path: Path) -> list[str]:
@@ -81,6 +60,7 @@ def main() -> None:
     keyword = "Nöbbelöv"
     min_area = 10.0
 
+    sources = load_sources(SOURCES_PATH)
     if webpages_path.exists():
         urls = read_urls(webpages_path)
     else:
@@ -96,7 +76,7 @@ def main() -> None:
     for url in urls:
         all_lines.append(f"\n#######\n####### Source: {url} \n")
         try:
-            listings, warning = scrape_one(url)
+            listings, warning = scrape_one(url, sources)
             if warning:
                 all_lines.append(warning)
                 all_lines.append("")
