@@ -1,0 +1,7 @@
+{
+  "url": "https://github.com/ErikBergman",
+  "xpath": "//*[contains(concat(' ', normalize-space(@class), ' '), ' vcard-details ')]",
+  "timeout_seconds": 20,
+  "user_agent": "Mozilla/5.0 (xpath-monitor)",
+  "log_path": "logs/element_inner_html.log"
+}
